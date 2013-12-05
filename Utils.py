@@ -5,7 +5,8 @@ modules in the PyAIML package.
 
 
 def sentences(s):
-    """Split the string s into a list of sentences."""
+    """Split the string s into a list of sentences.
+    """
     try:
         s+""
     except:
@@ -16,22 +17,23 @@ def sentences(s):
     while pos < l:
         try:
             p = s.index('.', pos)
-        except:
+        except ValueError:
             p = l+1
         try:
             q = s.index('?', pos)
-        except:
+        except ValueError:
             q = l+1
         try:
             e = s.index('!', pos)
-        except:
+        except ValueError:
             e = l+1
         end = min(p, q, e)
         sentence_list.append(s[pos:end].strip())
         pos = end+1
     # If no sentences were found, return a one-item list containing
     # the entire input string.
-    if len(sentence_list) == 0: sentence_list.append(s)
+    if len(sentence_list) == 0:
+        sentence_list.append(s)
     return sentence_list
 
 # Self test

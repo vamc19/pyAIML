@@ -8,14 +8,15 @@ import re
 import string
 import sys
 
+
 class PatternMgr:
     # special dictionary keys
     _UNDERSCORE = 0
-    _STAR       = 1
-    _TEMPLATE   = 2
-    _THAT       = 3
-    _TOPIC		= 4
-    _BOT_NAME   = 5
+    _STAR = 1
+    _TEMPLATE = 2
+    _THAT = 3
+    _TOPIC = 4
+    _BOT_NAME = 5
 
     def __init__(self):
         self._root = {}
@@ -68,7 +69,7 @@ class PatternMgr:
             print "Error restoring PatternMgr from file %s:" % filename
             raise Exception, e
 
-    def add(self, (pattern,that,topic), template):
+    def add(self, (pattern, that, topic), template):
         """Add a [pattern/that/topic] tuple and its corresponding template
         to the node tree.
 
@@ -117,10 +118,9 @@ class PatternMgr:
                     key = self._UNDERSCORE
                 elif key == u"*":
                     key = self._STAR
-                if not node.has_key(key):
+                if not key in node:
                     node[key] = {}
                 node = node[key]
-
 
         # add the template.
         if not node.has_key(self._TEMPLATE):
@@ -137,7 +137,7 @@ class PatternMgr:
         """
         if len(pattern) == 0:
             return None
-        # Mutilate the input.  Remove all punctuation and convert the
+            # Mutilate the input.  Remove all punctuation and convert the
         # text to all caps.
         input = string.upper(pattern)
         input = re.sub(self._puncStripRE, " ", input)
@@ -179,7 +179,7 @@ class PatternMgr:
 
         # Pass the input off to the recursive pattern-matcher
         patMatch, template = self._match(input.split(), thatInput.split(), topicInput.split(), self._root)
-        if template == None:
+        if template is None:
             return ""
 
         # Extract the appropriate portion of the pattern, based on the
@@ -189,10 +189,10 @@ class PatternMgr:
             patMatch = patMatch[:patMatch.index(self._THAT)]
             words = input.split()
         elif starType == 'thatstar':
-            patMatch = patMatch[patMatch.index(self._THAT)+1 : patMatch.index(self._TOPIC)]
+            patMatch = patMatch[patMatch.index(self._THAT) + 1: patMatch.index(self._TOPIC)]
             words = thatInput.split()
         elif starType == 'topicstar':
-            patMatch = patMatch[patMatch.index(self._TOPIC)+1 :]
+            patMatch = patMatch[patMatch.index(self._TOPIC) + 1:]
             words = topicInput.split()
         else:
             # unknown value
@@ -209,7 +209,7 @@ class PatternMgr:
             # that ISN'T the one we're looking for.
             if i < k:
                 continue
-            # If we're reached the end of the pattern, we're done.
+                # If we're reached the end of the pattern, we're done.
             if j == len(patMatch):
                 break
             if not foundTheRightStar:
@@ -220,32 +220,36 @@ class PatternMgr:
                         foundTheRightStar = True
                     start = i
                     # Iterate through the rest of the string.
-                    for k in range (i, len(words)):
+                    for k in xrange(i, len(words)):
                         # If the star is at the end of the pattern,
                         # we know exactly where it ends.
-                        if j+1  == len (patMatch):
-                            end = len (words)
+                        if j + 1 == len(patMatch):
+                            end = len(words)
                             break
-                        # If the words have started matching the
+                            # If the words have started matching the
                         # pattern again, the star has ended.
-                        if patMatch[j+1] == words[k]:
+                        if patMatch[j + 1] == words[k]:
                             end = k - 1
                             i = k
                             break
-                # If we just finished processing the star we cared
+                    # If we just finished processing the star we cared
                 # about, we exit the loop early.
                 if foundTheRightStar:
                     break
-            # Move to the next element of the pattern.
+                # Move to the next element of the pattern.
             j += 1
 
         # extract the star words from the original, unmutilated input.
         if foundTheRightStar:
             #print string.join(pattern.split()[start:end+1])
-            if starType == 'star': return string.join(pattern.split()[start:end+1])
-            elif starType == 'thatstar': return string.join(that.split()[start:end+1])
-            elif starType == 'topicstar': return string.join(topic.split()[start:end+1])
-        else: return ""
+            if starType == 'star':
+                return string.join(pattern.split()[start:end + 1])
+            elif starType == 'thatstar':
+                return string.join(that.split()[start:end + 1])
+            elif starType == 'topicstar':
+                return string.join(topic.split()[start:end + 1])
+        else:
+            return ""
 
     def _match(self, words, thatWords, topicWords, root):
         """Return a tuple (pat, tem) where pat is a list of nodes, starting
@@ -264,7 +268,7 @@ class PatternMgr:
                 # pattern-match on the _THAT node with thatWords as words.
                 try:
                     pattern, template = self._match(thatWords, [], topicWords, root[self._THAT])
-                    if pattern != None:
+                    if pattern is not None:
                         pattern = [self._THAT] + pattern
                 except KeyError:
                     pattern = []
@@ -274,17 +278,19 @@ class PatternMgr:
                 # on the _TOPIC node with topicWords as words.
                 try:
                     pattern, template = self._match(topicWords, [], [], root[self._TOPIC])
-                    if pattern != None:
+                    if pattern is not None:
                         pattern = [self._TOPIC] + pattern
                 except KeyError:
                     pattern = []
                     template = None
-            if template == None:
+            if template is None:
                 # we're totally out of input.  Grab the template at this node.
                 pattern = []
-                try: template = root[self._TEMPLATE]
-                except KeyError: template = None
-            return (pattern, template)
+                try:
+                    template = root[self._TEMPLATE]
+                except KeyError:
+                    template = None
+            return pattern, template
 
         first = words[0]
         suffix = words[1:]
@@ -295,37 +301,37 @@ class PatternMgr:
         if root.has_key(self._UNDERSCORE):
             # Must include the case where suf is [] in order to handle the case
             # where a * or _ is at the end of the pattern.
-            for j in range(len(suffix)+1):
+            for j in range(len(suffix) + 1):
                 suf = suffix[j:]
                 pattern, template = self._match(suf, thatWords, topicWords, root[self._UNDERSCORE])
                 if template is not None:
                     newPattern = [self._UNDERSCORE] + pattern
-                    return (newPattern, template)
+                    return newPattern, template
 
         # Check first
         if root.has_key(first):
             pattern, template = self._match(suffix, thatWords, topicWords, root[first])
             if template is not None:
                 newPattern = [first] + pattern
-                return (newPattern, template)
+                return newPattern, template
 
         # check bot name
         if root.has_key(self._BOT_NAME) and first == self._botName:
             pattern, template = self._match(suffix, thatWords, topicWords, root[self._BOT_NAME])
             if template is not None:
                 newPattern = [first] + pattern
-                return (newPattern, template)
+                return newPattern, template
 
         # check star
         if root.has_key(self._STAR):
             # Must include the case where suf is [] in order to handle the case
             # where a * or _ is at the end of the pattern.
-            for j in range(len(suffix)+1):
+            for j in range(len(suffix) + 1):
                 suf = suffix[j:]
                 pattern, template = self._match(suf, thatWords, topicWords, root[self._STAR])
                 if template is not None:
                     newPattern = [self._STAR] + pattern
-                    return (newPattern, template)
+                    return newPattern, template
 
         # No matches were found.
-        return (None, None)
+        return None, None
