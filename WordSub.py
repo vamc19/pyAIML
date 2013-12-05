@@ -25,12 +25,15 @@ not.
 # 'dict' objects weren't available to subclass from until version 2.2.
 # Get around this by importing UserDict.UserDict if the built-in dict
 # object isn't available.
-try: dict
-except: from UserDict import UserDict as dict
+try:
+    dict
+except:
+    from UserDict import UserDict as dict
 
 import ConfigParser
 import re
 import string
+
 
 class WordSub(dict):
     """All-in-one multiple-string-substitution class."""
@@ -41,7 +44,7 @@ class WordSub(dict):
             return "\\b%s\\b" % re.escape(word)
         else: 
             return r"\b%s\b" % re.escape(word)
-    
+
     def _update_regex(self):
         """Build re object based on the keys of the current
         dictionary.

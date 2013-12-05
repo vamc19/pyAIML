@@ -62,7 +62,7 @@ defaultPerson = {
     "him":"me",
     "his":"my",
     "himself":"myself",
-    
+
     # 3rd->1st (feminine)
     "she":"I",
     "her":"me",
@@ -121,7 +121,7 @@ defaultNormal = {
     "couldn't": "could not",
     "wouldn't": "would not",
     "shouldn't": "should not",
-    
+
     "isn't": "is not",
     "ain't": "is not",
     "don't": "do not",
