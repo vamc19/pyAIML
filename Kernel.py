@@ -22,8 +22,8 @@ import xml.sax
 class Kernel:
     # module constants
     _globalSessionID = "_global" # key of the global session (duh)
-    _maxHistorySize = 10 # maximum length of the _inputs and _responses lists
-    _maxRecursionDepth = 100 # maximum number of recursive <srai>/<sr> tags before the response is aborted.
+    _maxHistorySize = 10    # maximum length of the _inputs and _responses lists
+    _maxRecursionDepth = 100    # maximum number of recursive <srai>/<sr> tags before the response is aborted.
     # special predicate keys
     _inputHistory = "_inputHistory"     # keys to a queue (list) of recent user input
     _outputHistory = "_outputHistory"   # keys to a queue (list) of recent responses.
@@ -84,6 +84,7 @@ class Kernel:
             "topicstar": self._processTopicstar,
             "uppercase": self._processUppercase,
             "version": self._processVersion,
+            "function": self._processFunction,
         }
 
     def bootstrap(self, brainFile=None, learnFiles=[], commands=[]):
@@ -156,7 +157,8 @@ class Kernel:
         NOTE: the current contents of the 'brain' will be discarded!
 
         """
-        if self._verboseMode: print "Loading brain from %s..." % filename,
+        if self._verboseMode:
+            print "Loading brain from %s..." % filename,
         start = time.clock()
         self._brain.restore(filename)
         if self._verboseMode:
@@ -165,7 +167,8 @@ class Kernel:
 
     def saveBrain(self, filename):
         """Dump the contents of the bot's brain to a file on disk."""
-        if self._verboseMode: print "Saving brain to %s..." % filename,
+        if self._verboseMode:
+            print "Saving brain to %s..." % filename,
         start = time.clock()
         self._brain.save(filename)
         if self._verboseMode:
@@ -1111,6 +1114,16 @@ class Kernel:
 
         """
         return self.version()
+
+    # <execute>
+    def _processFunction(self, elem, sessionID):
+        """Process an <execute> AIML element."""
+
+        args = []
+        requested_function = elem[2][2].strip()
+        result = getattr(functions, requested_function)(*args)
+        self.setPredicate('result', result)
+        return ""
 
 
 ##################################################

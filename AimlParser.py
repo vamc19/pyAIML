@@ -454,6 +454,7 @@ class AimlHandler(ContentHandler):
         "topicstar":    ([], ["index"], False),
         "uppercase":    ([], [], True),
         "version":      ([], [], False),
+        "function":     ([], [], True),    # May contain strings, or other tags.
     }
 
     def _validateElemStart(self, name, attr, version):
@@ -515,7 +516,7 @@ class AimlHandler(ContentHandler):
             if not (parent=="random" or nonBlockStyleCondition):
                 raise AimlParserError(("Unexpected <li> element contained by <%s> element "%parent)+self._location())
             if nonBlockStyleCondition:
-                if parentAttr.has_key("name"):
+                if "name" in parentAttr:
                     # Single-predicate condition.  Each <li> element except the
                     # last must have a "value" attribute.
                     if len(attr) == 0:
@@ -525,8 +526,8 @@ class AimlHandler(ContentHandler):
                             raise AimlParserError("Unexpected default <li> element inside <condition> "+self._location())
                         else:
                             self._foundDefaultLiStack[-1] = True
-                    elif len(attr) == 1 and attr.has_key("value"):
-                        pass # this is the valid case
+                    elif len(attr) == 1 and ("value" in attr):
+                        pass  # this is the valid case
                     else:
                         raise AimlParserError("Invalid <li> inside single-predicate <condition> "+self._location())
                 elif len(parentAttr) == 0:
@@ -539,7 +540,7 @@ class AimlHandler(ContentHandler):
                             raise AimlParserError("Unexpected default <li> element inside <condition> "+self._location())
                         else:
                             self._foundDefaultLiStack[-1] = True
-                    elif len(attr) == 2 and attr.has_key("value") and attr.has_key("name"):
+                    elif len(attr) == 2 and ("value" in attr) and ("name" in attr):
                         pass # this is the valid case
                     else:
                         raise AimlParserError("Invalid <li> inside multi-predicate <condition> "+self._location())
