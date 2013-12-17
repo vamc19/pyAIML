@@ -51,6 +51,7 @@ defaultGender = {
 
 defaultPerson = {
     # 1st->3rd (masculine)
+    "am": "is",
     "I": "he",
     "me": "him",
     "my": "his",
@@ -58,20 +59,22 @@ defaultPerson = {
     "myself": "himself",
 
     # 3rd->1st (masculine)
-    "he":"I",
-    "him":"me",
-    "his":"my",
-    "himself":"myself",
+    "is": "am",
+    "he": "I",
+    "him": "me",
+    "his": "my",
+    "himself": "myself",
 
     # 3rd->1st (feminine)
-    "she":"I",
-    "her":"me",
-    "hers":"mine",
-    "herself":"myself",
+    "she": "I",
+    "her": "me",
+    "hers": "mine",
+    "herself": "myself",
 }
 
 defaultPerson2 = {
     # 1st -> 2nd
+    "am": "are",
     "I": "you",
     "me": "you",
     "my": "your",
