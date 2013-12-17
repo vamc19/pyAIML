@@ -273,8 +273,8 @@ Nothing <random></random>here!
 
 <!-- unicode support -->
 <category>
-<pattern>ÔÇÉÏºÃ</pattern>
-<template>Hey, you speak Chinese! ÔÇÉÏºÃ</template>
+<pattern>ï¿½ï¿½ï¿½Ïºï¿½</pattern>
+<template>Hey, you speak Chinese! ï¿½ï¿½ï¿½Ïºï¿½</template>
 </category>
 
 <!-- whitespace preservation -->
@@ -284,6 +284,32 @@ Nothing <random></random>here!
    Rule!   <lowercase xml:space="default">(but   not   <set name="ignored">in
                                            here!</set>)
    </lowercase>   But   <set name="ignored">Here   They</set>   Do!</template>
+</category>
+
+<category>
+<pattern>HELLO WORLD</pattern>
+<template>
+<function name="hello_world"/> <get name="result"/>
+</template>
+</category>
+
+<category>
+<pattern>ADD</pattern>
+<template>
+<think>
+<set name="a">1</set>
+<set name="b">2</set>
+</think>
+<function name="add" args="a, b"/> <get name="result"/>
+</template>
+</category>
+
+<category>
+<pattern>TEST THIS *</pattern>
+<template>
+<think><set name="star"><star/></set></think>
+<function name="test_bed" args="star"/> <get name="result"/>
+</template>
 </category>
 
 </aiml>

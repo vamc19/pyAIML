@@ -1,5 +1,6 @@
 # -*- coding: latin-1 -*-
 """This file contains the public interface to the aiml module."""
+import imp
 import AimlParser
 import DefaultSubs
 import Utils
@@ -44,7 +45,7 @@ class Kernel:
         self._botPredicates = {}
         self.setBotPredicate("name", "Nameless")
 
-        # set up the word substitutors (subbers):
+        # set up the word substitutions (subbers):
         self._subbers = {}
         self._subbers['gender'] = WordSub(DefaultSubs.defaultGender)
         self._subbers['person'] = WordSub(DefaultSubs.defaultPerson)
@@ -196,7 +197,7 @@ class Kernel:
         created.
 
         """
-        self._addSession(sessionID) # add the session, if it doesn't already exist.
+        self._addSession(sessionID)     # add the session, if it doesn't already exist.
         self._sessions[sessionID][name] = value
 
     def getBotPredicate(self, name):
@@ -502,7 +503,7 @@ class Kernel:
 
         # Case #1: test the value of a specific predicate for a
         # specific value.
-        if attr.has_key('name') and attr.has_key('value'):
+        if 'name' in attr and 'value' in attr:
             val = self.getPredicate(attr['name'], sessionID)
             if val == attr['value']:
                 for e in elem[2:]:
@@ -547,7 +548,8 @@ class Kernel:
                     except:
                         # No attributes, no name/value attributes, no
                         # such predicate/session, or processing error.
-                        if self._verboseMode: print "Something amiss -- skipping listitem", li
+                        if self._verboseMode:
+                            print "Something amiss -- skipping listitem", li
                         raise
                 if not foundMatch:
                     # Check the last element of listitems.  If it has
@@ -555,16 +557,18 @@ class Kernel:
                     try:
                         li = listitems[-1]
                         liAttr = li[1]
-                        if not (liAttr.has_key('name') or liAttr.has_key('value')):
+                        if not ('name' in liAttr or 'value' in liAttr):
                             response += self._processElement(li, sessionID)
                     except:
                         # listitems was empty, no attributes, missing
                         # name/value attributes, or processing error.
-                        if self._verboseMode: print "error in default listitem"
+                        if self._verboseMode:
+                            print "error in default listitem"
                         raise
             except:
                 # Some other catastrophic cataclysm
-                if self._verboseMode: print "catastrophic condition failure"
+                if self._verboseMode:
+                    print "catastrophic condition failure"
                 raise
         return response
 
@@ -972,7 +976,7 @@ class Kernel:
         try:
             elem[2] + ""
         except TypeError:
-            raise TypeError, "Text element contents are not text"
+            raise TypeError("Text element contents are not text")
 
         # If the the whitespace behavior for this element is "default",
         # we reduce all stretches of >1 whitespace characters to a single
@@ -993,7 +997,7 @@ class Kernel:
             recent, and so on.
 
         <that> elements (when they appear inside <template> elements)
-        are the output equivilant of <input> elements; they return one
+        are the output equivalent of <input> elements; they return one
         of the Kernel's previous responses.
 
         """
@@ -1117,13 +1121,37 @@ class Kernel:
 
     # <execute>
     def _processFunction(self, elem, sessionID):
-        """Process an <execute> AIML element."""
-
+        """Process an <function> AIML element.
+           The result of the function will be stored in a predicate 'result'.
+        """
+        # function_file has to be set after initializing kernel. kernel.setPredicate should be used for this.
+        # TODO: Should be able to import functions from any module, not only from a predefined file. Find some
+        # efficient way to do this.
+        if not 'function' in sys.modules:
+            function_file_path = self.getPredicate('function_file', sessionID)
+            try:
+                function = imp.load_source('function', function_file_path)
+            except IOError:
+                print "function_file not found."
+                raise IOError
+        else:
+            function = sys.modules['function']
+        attr = elem[1]
+        print attr
         args = []
-        requested_function = elem[2][2].strip()
-        result = getattr(functions, requested_function)(*args)
+        if 'name' in attr:
+            requested_function = attr['name']
+        else:
+            print "Function not defined."
+            raise
+        if 'args' in attr:
+            arg_vars = attr['args'].split(',')
+            for var in arg_vars:
+                args.append(self.getPredicate(var.strip(), sessionID))
+        result = getattr(function, requested_function)(*args)
         self.setPredicate('result', result)
         return ""
+
 
 
 ##################################################
@@ -1151,6 +1179,7 @@ if __name__ == "__main__":
     # Run some self-tests
     k = Kernel()
     k.bootstrap(learnFiles="self-test.aiml")
+    k.setPredicate('function_file', './test_function.py')
 
     global _numTests, _numPassed
     _numTests = 0
@@ -1189,8 +1218,8 @@ if __name__ == "__main__":
     _testTag(k, 'input', 'test input', ['You just said: test input'])
     _testTag(k, 'javascript', 'test javascript', ["Javascript is not yet implemented"])
     _testTag(k, 'lowercase', 'test lowercase', ["The Last Word Should Be lowercase"])
-    _testTag(k, 'person', 'test person', ['HE think i knows that my actions threaten him and his.'])
-    _testTag(k, 'person2', 'test person2', ['YOU think me know that my actions threaten you and yours.'])
+    _testTag(k, 'person', 'test person', ['HE is a cool guy.'])
+    _testTag(k, 'person2', 'test person2', ['YOU are a cool guy.'])
     _testTag(k, 'person2 (no contents)', 'test person2 I Love Lucy', ['YOU Love Lucy'])
     _testTag(k, 'random', 'test random', ["response #1", "response #2", "response #3"])
     _testTag(k, 'random empty', 'test random empty', ["Nothing here!"])
@@ -1224,6 +1253,9 @@ if __name__ == "__main__":
     _testTag(k, 'version', 'test version', ["PyAIML is version %s" % k.version()])
     _testTag(k, 'whitespace preservation', 'test whitespace',
              ["Extra   Spaces\n   Rule!   (but not in here!)    But   Here   They   Do!"])
+    _testTag(k, 'function', 'hello world', ['Executed function `hello_world`.'])
+    _testTag(k, 'function', 'add', ['3'])
+    _testTag(k, 'function', 'test this hell', ['hell'])
 
     # Report test results
     print "--------------------"
@@ -1234,4 +1266,5 @@ if __name__ == "__main__":
 
     # Run an interactive interpreter
     print "\nEntering interactive mode (ctrl-c to exit)"
-    while True: print k.respond(raw_input("> "))
+    while True:
+        print k.respond(raw_input("> "))
