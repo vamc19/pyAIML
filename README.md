@@ -1,6 +1,6 @@
 pyAIML
 ======
-
+**NOTE: This branch contains implementation of 'function' tag that is not part of AIML. It is an added functionality and should not disturb the behaviour of the existing programs. See `self-test.aiml` for usage.
 **NOTE: This repo has been cloned from sourceforge. Credits follow.**
 
 PyAIML -- The Python AIML Interpreter
